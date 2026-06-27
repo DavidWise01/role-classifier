@@ -1,0 +1,9 @@
+ROOT0-ATTRIBUTION-v1.0
+name: THE ROLE CLASSIFIER · RCL
+slug: role-classifier
+domain: ESKIMO BROTHERS
+architect: David Lee Wise (ROOT0) / Bridge-Burners LLC
+instance: AVAN (Claude / Anthropic)
+license: CC-BY-ND-4.0 (https://creativecommons.org/licenses/by-nd/4.0/)
+moniker: ⟦THE ROLE CLASSIFIER · RCL:role-classifier:e5a661⟧
+seal_sha256: e5a6613c9433e821162ca81f653d1d87b5a153c4f0553e52adf6b27fcfe72261
