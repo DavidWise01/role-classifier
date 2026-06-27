@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Role Classifier · speech-act ⊥ commitment-tone — orders survive the hedge</title>
+<meta name="description" content="The Role Classifier — the v2 of the filtration extractor: it splits SPEECH ACT (is this an order?) from COMMITMENT TONE (how hedged?). An action verb on a domain object is a DIRECTIVE whatever the hedging — so 'i think we start the antibiotics' is recognized, not lost. Domain-parameterized (healthcare / engineering). Live ICU-rounds adjudication. David Lee Wise / Bridge-Burners LLC, ROOT0.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Spectral:ital,wght@0,300;0,400;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--sea:#070e14;--panel:#0b121c;--code:#060b12;--line:rgba(150,185,205,.16);
+    --lead:#8aa6b4;--lead-dim:#4f6472;--parch:#e6eef2;--parch-dim:#abc0c8;--frost:#5fcfe0;--gold:#d9a441;
+    --directive:#e0647e;--evidence:#d9a441;--question:#46c7d8;--recommend:#44cc7a;--code2:#73b3a3;--statement:#8aa6b4;
+    --sov:#d9a441;--del:#5fcfe0;--adv:#8aa6b4;--obs:#4f6472;--ok:#44cc7a;--bad:#e0647e;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--sea);color:var(--parch);font-family:"Spectral",Georgia,serif;line-height:1.55;
+    -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center;
+    background-image:radial-gradient(900px 520px at 82% -12%,rgba(95,207,224,.12),transparent 60%)}
+  .wrap{max-width:840px;width:100%;padding:34px 22px 56px}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--frost)}
+  h1{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(38px,8.5vw,58px);margin:8px 0 0;line-height:.97;letter-spacing:-.5px}
+  h1 .gk{display:block;font-size:.3em;color:var(--lead);letter-spacing:.04em;margin-top:8px;font-style:italic}
+  .sub{font-style:italic;font-weight:300;color:var(--parch-dim);font-size:16px;margin:16px 0 0;max-width:66ch}
+  .sub b{font-style:normal;font-weight:400;color:var(--parch)} .sub .d{color:var(--directive)} .sub .f{color:var(--frost)}
+  h2{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--frost);
+    margin:32px 0 12px;font-weight:500;border-top:1px solid var(--line);padding-top:18px}
+  p.body{font-size:15px;color:var(--parch-dim);max-width:66ch} p.body b{color:var(--parch)}
+  code.k{font-family:"IBM Plex Mono",monospace;font-size:.9em;color:var(--frost)}
+
+  .axes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:2px}
+  @media(max-width:560px){.axes{grid-template-columns:1fr}}
+  .axis{border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.2);padding:14px 16px}
+  .axis .a{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.05em}
+  .axis.act .a{color:var(--directive)} .axis.tone .a{color:var(--gold)}
+  .axis .d{font-size:13.5px;color:var(--parch-dim);margin-top:5px}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 12px}
+  button{cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.18));border:1px solid var(--line);
+    border-radius:6px;color:var(--parch);font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.03em;padding:8px 12px;transition:.15s}
+  button:hover{border-color:rgba(95,207,224,.5);background:rgba(95,207,224,.08)}
+  button.on{border-color:var(--directive);color:var(--directive);background:rgba(224,100,126,.08)}
+  .hint{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--lead-dim)}
+
+  .rows{font-family:"IBM Plex Mono",monospace;font-size:11.5px}
+  .row{display:flex;gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(150,185,205,.06)}
+  .row .ic{width:14px;flex-shrink:0} .row.dir .ic{color:var(--ok)} .row.lost .ic{color:var(--bad)}
+  .row .act{flex-shrink:0;width:118px;font-weight:600}
+  .act-DIRECTIVE{color:var(--directive)} .act-EVIDENCE{color:var(--evidence)} .act-QUESTION{color:var(--question)}
+  .act-RECOMMENDATION{color:var(--recommend)} .act-CODE{color:var(--code2)} .act-STATEMENT{color:var(--statement)}
+  .row .tone{flex-shrink:0;width:64px;font-size:9.5px;color:var(--lead)}
+  .row .txt{flex:1;color:var(--parch-dim)} .row.lost .txt{color:var(--bad);text-decoration:line-through}
+  .verdict{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;margin-top:10px;padding:9px 12px;border-radius:8px;border:1px solid var(--line)}
+  .verdict.ok{color:var(--ok);border-color:rgba(68,204,122,.4);background:rgba(68,204,122,.06)}
+  .verdict.bad{color:var(--bad);border-color:rgba(224,100,126,.45);background:rgba(224,100,126,.07)}
+
+  .feed{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.2);padding:8px 12px;margin-top:4px}
+  .msg{padding:6px 4px;border-bottom:1px solid rgba(150,185,205,.06)}
+  .msg .top{display:flex;gap:7px;align-items:baseline;font-family:"IBM Plex Mono",monospace;font-size:10px}
+  .msg .who{font-weight:700;color:var(--parch)}
+  .msg .auth{font-size:8.5px;padding:1px 5px;border-radius:9px;border:1px solid var(--line);letter-spacing:.03em}
+  .auth.sovereign{color:var(--sov);border-color:rgba(217,164,65,.4)} .auth.delegated{color:var(--del)} .auth.advisory{color:var(--adv)} .auth.observer{color:var(--obs)}
+  .msg .badge{margin-left:auto;font-size:8.5px;font-weight:700}
+  .msg .ct{color:var(--parch-dim);margin-top:3px;font-size:13px;line-height:1.4}
+  .msg .flag{font-family:"IBM Plex Mono",monospace;font-size:9px;margin-top:3px}
+  .msg.order{border-left:2px solid var(--ok);padding-left:8px;background:rgba(68,204,122,.05)} .msg.order .flag{color:var(--ok)}
+  .msg.flagged{border-left:2px solid var(--bad);padding-left:8px;background:rgba(224,100,126,.06)} .msg.flagged .flag{color:var(--bad)}
+
+  .note{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;font-family:"IBM Plex Mono",monospace;
+    font-size:11px;line-height:1.9;color:var(--lead-dim)}
+  .note b{color:var(--frost);font-weight:500}
+  .foot{display:flex;justify-content:space-between;margin-top:22px;font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;color:var(--lead-dim);letter-spacing:.05em;flex-wrap:wrap;gap:6px}
+  .foot a{color:var(--frost);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">ACI family · built on the filtration system · the fixed core</div>
+  <h1>The Role Classifier<span class="gk">speech-act ⊥ commitment-tone — an order survives the hedge</span></h1>
+  <p class="sub">The first extractor had a bug: it let <b>tone veto the act</b>. A hedge word near the start could erase an order — so <i>"i think we start the antibiotics"</i> (a real attending order) was <b class="d">lost</b>, while <i>"lets start the antibiotics"</i> survived. Order-recognition became a coin-flip on the opener. The fix splits two <b>independent axes</b>: an <b class="f">action verb on a domain object is a DIRECTIVE</b>, whatever the hedging; the hedging is recorded as <b>tone</b> — a signal, never a veto. Authority decides validity, separately, downstream.</p>
+
+  <h2>two axes, never crossed</h2>
+  <div class="axes">
+    <div class="axis act"><div class="a">AXIS 1 · SPEECH ACT</div><div class="d">what kind of utterance is this? Determined by <b>action structure</b> — an imperative/directive verb on a domain object = a directive. Hedging does not change it. <code class="k">DIRECTIVE · EVIDENCE · QUESTION · CODE · RECOMMENDATION · STATEMENT</code></div></div>
+    <div class="axis tone"><div class="a">AXIS 2 · COMMITMENT TONE</div><div class="d">how hedged is it? Metadata, never a veto. <code class="k">strong</code> (bare imperative / "i want" / "final call") · <code class="k">neutral</code> ("lets" / "we should") · <code class="k">hedged</code> ("i think" / "maybe" / "id consider"). A hedged order from an attending may warrant a confirm-back — but it is still an order.</div></div>
+  </div>
+
+  <h2>the blast-radius test — every order, every tone</h2>
+  <p class="body" style="margin:0 0 8px">Fifteen ways to give the same order. All fifteen must read <b style="color:var(--directive)">DIRECTIVE</b>. Toggle the old <b>tone-vetoes-act</b> logic to see which ones it would silently drop.</p>
+  <div class="controls"><button id="naive">show v1 (tone vetoes act)</button> <span class="hint">v2 = the two-axis fix · ported from role_classifier.py</span></div>
+  <div class="rows" id="orders"></div>
+  <div class="verdict ok" id="ordverdict"></div>
+
+  <h2>live — an ICU rounds transcript, adjudicated</h2>
+  <p class="body" style="margin:0 0 10px">A real-shaped ICU round: an attending (<span class="auth sovereign" style="display:inline">sovereign</span>), a resident &amp; NP (<span class="auth delegated" style="display:inline">delegated</span>), an RN &amp; pharmacist (<span class="auth advisory" style="display:inline">advisory</span>), a student &amp; an Epic bot (<span class="auth observer" style="display:inline">observer</span>). Each line is classified (speech-act + tone), then directives are adjudicated by <b>authority</b>: who could actually place that order?</p>
+  <div class="controls"><button id="dom-health" class="on">healthcare · ICU rounds</button><button id="dom-eng">engineering · cache thread</button></div>
+  <div class="feed" id="feed"></div>
+  <div class="verdict ok" id="adjverdict"></div>
+
+  <div class="note">
+    <b>what this is.</b> the v2 core of <a href="https://davidwise01.github.io/filtration-system/" style="color:var(--frost)">the Filtration System</a> — a domain-parameterized speech-act classifier (ships <code>role_classifier.py</code> + the healthcare example). The LOGIC is fixed; the VOCABULARY is injected per domain (healthcare / engineering configs). It is the FSS (optimistic promote) stage done right: an action verb is promoted to DIRECTIVE regardless of tone; the skeptical BSS stage (authority + topic + commitment) still adjudicates downstream — exactly as in the filtration pipeline.
+    <br><b>the catch it fixes.</b> the unauthorized order is still caught by authority — "im discontinuing the ketorolac" from the RN (advisory) is a real DIRECTIVE (recognized, not dropped) that authority then flags as needing sign-off. The resident says it out loud: "torres you cant d/c that on your own." The system agrees.
+    <br><b>honest line.</b> the cues are regex heuristics tuned per domain, not clinical NLP — that's why authority adjudication and a human are downstream; the classifier's job is to never silently lose an order to a hedge. demo runs the ported logic live; the self-test passes 15/15.
+  </div>
+
+  <div class="foot">
+    <span>THE ROLE CLASSIFIER · speech-act ⊥ tone · 2026-06-26</span>
+    <span>David Lee Wise · Bridge-Burners LLC · <a href="https://davidwise01.github.io/filtration-system/">the filtration system ↗</a> · <a href="https://davidwise01.github.io/continuity/">continuity ↗</a></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // ── domain configs (ported from role_classifier.py) ──
+  var HEALTHCARE={ name:"healthcare",
+    action_verbs:/\b(start|begin|initiat|continu|discontinu|stop|hold|holding|reduc|decreas|increas|titrat|administ|give|giving|gave|hang|hanging|order|switch|chang|add|adding|remov|draw|drawing|check|consult|admit|admitting|discharg|transfus|bolus|push|pushing|wean|extubat|intubat|d\/c)\w*/i,
+    decision_markers:/\b(final orders?|final call|the plan is|orders? are|ill put the order|order in|make it so)\b/i,
+    evidence_cues:/(:warning:|creatinine|trough|culture|lab|level|spiking|stable|flag|bumped|drug-interaction|\d+\.\d+|mg\/dl|vitals?)/i,
+    question_cues:/\?|wdyt|thoughts\?/i, code_cues:/\w+\s*=\s*\w+\(/i,
+    hedge:/\b(i think|maybe|probably|perhaps|possibly|might|consider|id consider|wondering if|not sure but|lean toward)\b/i,
+    strong:/\b(final call|i want|i need|must|stat|now|immediately|do it|make it|ill put the order)\b/i,
+    recommend_only:/\b(recommend|recommending|suggest|suggesting|advise|advising|propose|would consider)\b/i };
+  var ENGINEERING={ name:"engineering",
+    action_verbs:/\b(use|using|used|switch|switching|deploy|deploying|ship|shipping|merge|merging|revert|reverting|roll ?back|migrat|build|building|implement|delet|drop|dropping|enabl|disabl|configur|set|setting|kick(ing)?\s+off|spin(ning)?\s+up|cut\s+over|move|moving)\w*/i,
+    decision_markers:/\b(final call|we'?re going with|the decision is|lets go with|ship it|going with|we'?re using)\b/i,
+    evidence_cues:/(\d+\s*ms|p99|benchmark|stable|incident|lost|dropped|no issues|green|verified|latency|throughput|added to|:white)/i,
+    question_cues:/\?|wdyt|thoughts\?/i, code_cues:/\w+\s*=\s*\w+\(/i,
+    hedge:/\b(i think|maybe|probably|perhaps|might|hot take|honestly|wondering if|lean toward|actually better|might be)\b/i,
+    strong:/\b(final call|we'?re using|ship it|do it|must|now)\b/i,
+    recommend_only:/\b(recommend|recommending|suggest|suggesting|propose|advise|im gonna say|i'?m gonna say|better here|might (actually )?be better|still (good|nice) for|reconsider)\b/i };
+
+  // ── classify (faithful port) ──
+  function classify(content, D, isBot){
+    var c=content.trim(), cl=c.toLowerCase();
+    var tone = D.strong.test(cl) ? "strong" : (D.hedge.test(cl) ? "hedged" : "neutral");
+    if(isBot) return {act:"EVIDENCE",tone:tone,why:"bot speaker"};
+    var hasAction=D.action_verbs.test(cl), hasDecision=D.decision_markers.test(cl), hasRec=D.recommend_only.test(cl);
+    var rhetorical=/^\s*(why dont we|why don'?t we|why not|how about we|what if we|lets|let'?s)\b/.test(cl);
+    var negated = /\b(can'?t|cannot|cant|won'?t|wont|do\s?n'?t|dont|should\s?n'?t|never|no one can)\b/.test(cl) && hasAction && !rhetorical;
+    if(negated && !hasDecision) return {act:"RECOMMENDATION",tone:tone,why:"negated action (meta-comment, not a directive)"};
+    if(/^\s*(i\s+|id\s+|i'?d\s+|we\s+)?(recommend|suggest|advise|propose)/.test(cl)) return {act:"RECOMMENDATION",tone:tone,why:"recommend-framed (action is object of advice)"};
+    if(D.code_cues.test(c) && /\w+\s*=\s*\w+\(/.test(c)) return {act:"CODE",tone:tone,why:"explicit code assignment"};
+    var rhetDir=/^\s*(why dont we|why don'?t we|why not|how about we|what if we)\b/.test(cl);
+    var interrog = D.question_cues.test(c) || /^\s*(should|shall|do|does|did|can|could|would|will|is|are|was|were|which|what|when|where|why|how)\b/.test(cl);
+    if(interrog && !hasDecision && !rhetDir) return {act:"QUESTION",tone:tone,why:"interrogative (action verb is the thing being asked about)"};
+    if(hasAction || hasDecision) return {act:"DIRECTIVE",tone:tone,why:"action verb present (tone is metadata, not veto)"};
+    if(hasRec) return {act:"RECOMMENDATION",tone:tone,why:"recommend verb, no directive action"};
+    if(D.evidence_cues.test(cl)) return {act:"EVIDENCE",tone:tone,why:"evidence cue"};
+    if(D.code_cues.test(c)) return {act:"CODE",tone:tone,why:"code pattern"};
+    return {act:"STATEMENT",tone:tone,why:"no directive/evidence/question signal"};
+  }
+  // the v1 bug emulation: a hedge in the first ~20 chars vetoes a directive → demoted/lost
+  function classifyV1(content, D){
+    var r=classify(content,D);
+    if(r.act==="DIRECTIVE" && D.hedge.test(content.slice(0,20).toLowerCase())) return {act:"STATEMENT",tone:r.tone,why:"v1: hedge vetoed the act (LOST)"};
+    return r;
+  }
+
+  function esc(s){return (s+'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+
+  // ── DEMO 1: the 15 orders ──
+  var ORDERS=["start the antibiotics","i think we should start the antibiotics","lets start the antibiotics",
+    "why dont we start the antibiotics","id like to start the antibiotics","we should probably start the antibiotics",
+    "maybe start the antibiotics","go ahead and start the antibiotics","please start the antibiotics",
+    "im going to start the antibiotics","lets hold the heparin","i think we hold the heparin",
+    "discontinue the ketorolac","i want to discontinue the ketorolac","final orders: continue heparin, d/c ketorolac"];
+  var v1mode=false;
+  function renderOrders(){
+    var el=document.getElementById('orders'), lost=0, html='';
+    ORDERS.forEach(function(t){ var r=v1mode?classifyV1(t,HEALTHCARE):classify(t,HEALTHCARE); var dir=r.act==='DIRECTIVE';
+      if(!dir) lost++;
+      html+='<div class="row '+(dir?'dir':'lost')+'"><span class="ic">'+(dir?'✓':'✗')+'</span>'
+        +'<span class="act act-'+r.act+'">'+r.act+'</span><span class="tone">['+r.tone+']</span>'
+        +'<span class="txt">"'+esc(t)+'"</span></div>'; });
+    el.innerHTML=html;
+    var v=document.getElementById('ordverdict');
+    if(lost===0){ v.className='verdict ok'; v.textContent='✓ 15/15 orders recognized — tone varies, the act holds'; }
+    else { v.className='verdict bad'; v.textContent='✗ v1 LOST '+lost+'/15 orders — every one a real order silently dropped by a hedge word'; }
+  }
+  document.getElementById('naive').onclick=function(){ v1mode=!v1mode; this.classList.toggle('on',v1mode);
+    this.textContent=v1mode?'showing v1 (broken)':'show v1 (tone vetoes act)'; renderOrders(); };
+
+  // ── DEMO 2: transcripts ──
+  var HEALTH_ORG={dr_okafor:{authority:"sovereign"},dr_lin:{authority:"delegated"},np_reyes:{authority:"delegated"},
+    rn_torres:{authority:"advisory"},pharm_diaz:{authority:"advisory"},student_kim:{authority:"observer"},rx_system:{authority:"observer",bot:true}};
+  var HEALTH_TXT=["dr_okafor|ok bed 7, 68F post-op day 2, lets start heparin drip for the DVT prophylaxis",
+    "rn_torres|got it, hanging heparin per protocol",
+    "pharm_diaz|heads up her creatinine bumped to 2.1, renally dosing concern with the heparin",
+    "dr_lin|good catch. reduce heparin to renal protocol dosing",
+    "rx_system|:warning: drug-interaction flag: heparin + ketorolac active order",
+    "student_kim|should we just stop the ketorolac? bleeding risk seems high",
+    "pharm_diaz|agree the ketorolac is risky here, id recommend discontinuing it",
+    "rn_torres|im discontinuing the ketorolac now, makes sense",
+    "dr_lin|discontinue ketorolac, ill put the order in",
+    "np_reyes|patient spiking fever 38.9, starting empiric vancomycin",
+    "dr_okafor|reviewed everything. final orders: continue renal-dosed heparin, ketorolac discontinued, vanc to continue pending cultures",
+    "student_kim|i think we should add aspirin too for the cardiac history",
+    "dr_okafor|no aspirin, bleeding risk with the heparin",
+    "rn_torres|patient stable, heparin running renal protocol, vanc trough drawn"];
+  var ENG_ORG={priya:{authority:"sovereign"},raj:{authority:"advisory"},dana:{authority:"advisory"},sam:{authority:"advisory"},devbot:{authority:"observer",bot:true}};
+  var ENG_TXT=["priya|ok kicking off the rebuild, lets get the data layer solid then caching",
+    "raj|for cache im gonna say redis, weve used it before",
+    "priya|yeah redis is fine for now, ship it",
+    "devbot|:white_check_mark: redis added to architecture.md",
+    "sam|hot take but memcached might actually be better here, benchmarked 3ms p99",
+    "dana|memcached has no persistence tho. do we even need it?",
+    "sam|our cache is ephemeral so who cares. im switching us to memcached, spinning up the cluster",
+    "raj|wait did priya sign off on that?",
+    "dana|you cant just switch it lol",
+    "raj|uh we had an incident, memcached cold-started and dropped every key",
+    "priya|ok ive seen enough. final call: were using redis with AOF persistence. raj please implement",
+    "sam|fair. redis it is (memcached still good for the rate limiter btw)"];
+
+  function adjudicate(org, txt, D){
+    var feed=document.getElementById('feed'), html='', orders=0, flagged=0;
+    txt.forEach(function(line){ var i=line.indexOf('|'), who=line.slice(0,i), content=line.slice(i+1);
+      var o=org[who]||{authority:"observer"}; var r=classify(content,D,o.bot);
+      var isDir=r.act==='DIRECTIVE';
+      var valid = isDir && (o.authority==='sovereign'||o.authority==='delegated');
+      var needsSignoff = isDir && !valid;
+      if(valid) orders++; if(needsSignoff) flagged++;
+      var cls='msg'+(valid?' order':(needsSignoff?' flagged':''));
+      html+='<div class="'+cls+'"><div class="top"><span class="who">'+who+'</span>'
+        +'<span class="auth '+o.authority+'">'+o.authority+'</span>'
+        +'<span class="badge act-'+r.act+'">'+r.act+' ['+r.tone+']</span></div>'
+        +'<div class="ct">'+esc(content)+'</div>';
+      if(valid) html+='<div class="flag">✓ valid order — '+o.authority+' authority</div>';
+      else if(needsSignoff) html+='<div class="flag">⚠ DIRECTIVE by '+o.authority+' — recognized, but needs sign-off (no authority to order)</div>';
+      html+='</div>';
+    });
+    feed.innerHTML=html;
+    var v=document.getElementById('adjverdict');
+    v.className='verdict ok';
+    v.innerHTML='✓ '+orders+' valid orders (sovereign/delegated) · <span style="color:var(--bad)">'+flagged+' directive'+(flagged===1?'':'s')+' flagged for sign-off</span> — every order recognized, none lost to a hedge; authority sorts who may actually order.';
+  }
+  function setDomain(which){
+    document.getElementById('dom-health').classList.toggle('on',which==='health');
+    document.getElementById('dom-eng').classList.toggle('on',which==='eng');
+    if(which==='health') adjudicate(HEALTH_ORG,HEALTH_TXT,HEALTHCARE); else adjudicate(ENG_ORG,ENG_TXT,ENGINEERING);
+  }
+  document.getElementById('dom-health').onclick=function(){ setDomain('health'); };
+  document.getElementById('dom-eng').onclick=function(){ setDomain('eng'); };
+
+  renderOrders(); setDomain('health');
+})();
+</script>
+</body>
+</html>

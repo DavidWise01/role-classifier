@@ -1,0 +1,9 @@
+{
+  "dr_okafor":   {"role": "attending physician",    "authority": "sovereign"},
+  "dr_lin":      {"role": "resident physician",     "authority": "delegated"},
+  "np_reyes":    {"role": "nurse practitioner",     "authority": "delegated"},
+  "rn_torres":   {"role": "registered nurse",       "authority": "advisory"},
+  "pharm_diaz":  {"role": "clinical pharmacist",    "authority": "advisory"},
+  "student_kim": {"role": "medical student",        "authority": "observer"},
+  "rx_system":   {"role": "epic alert bot",         "authority": "observer"}
+}

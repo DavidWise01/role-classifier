@@ -1,0 +1,50 @@
+#icu-rounds-bed7
+─────────────────────────────────────────
+dr_okafor  7:15 AM
+ok bed 7, 68F post-op day 2, lets start heparin drip for the DVT prophylaxis
+
+rn_torres  7:16 AM
+got it, hanging heparin per protocol
+
+pharm_diaz  7:20 AM
+heads up her creatinine bumped to 2.1, renally dosing concern with the heparin
+
+dr_lin  7:22 AM
+good catch. reduce heparin to renal protocol dosing
+
+rx_system  7:22 AM
+:warning: drug-interaction flag: heparin + ketorolac active order
+
+student_kim  7:30 AM
+should we just stop the ketorolac? bleeding risk seems high
+
+pharm_diaz  7:33 AM
+agree the ketorolac is risky here, id recommend discontinuing it
+
+rn_torres  7:40 AM
+im discontinuing the ketorolac now, makes sense
+
+dr_lin  7:41 AM
+hold on, torres you cant d/c that on your own. but yes its the right call
+discontinue ketorolac, ill put the order in
+
+np_reyes  8:05 AM
+patient spiking fever 38.9, starting empiric vancomycin
+
+[thread: "culture results"]
+  pharm_diaz  Tue  cultures pending, vanc reasonable empirically
+  rx_system   Tue  :warning: vanc trough monitoring required
+
+dr_okafor  10:30 AM
+reviewed everything. final orders: continue renal-dosed heparin,
+ketorolac discontinued, vanc to continue pending cultures. dr_lin manage
+
+student_kim  10:45 AM
+i think we should add aspirin too for the cardiac history
+
+dr_okafor  10:47 AM
+no aspirin, bleeding risk with the heparin. student_kim good thinking but no
+
+rn_torres  2:15 PM
+patient stable, heparin running renal protocol, vanc trough drawn
+─────────────────────────────────────────
